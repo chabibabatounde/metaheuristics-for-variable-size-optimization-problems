@@ -1,5 +1,6 @@
 from System.Optimizer.PartialKnowledge import PartialKnowledge
-from System.Optimizer.Actions.Eat import Eat
+import importlib
+import os
 
 
 class PartialAction:
@@ -30,11 +31,10 @@ class PartialAction:
                     self.duration_cycle = element
 
     def get_some(self):
-        instance = type(self.name, (object,), {})()
-        print(self)
-        exit(instance)
-
-        print(self.name)
+        module_name = f"System.Optimizer.Actions.{self.name}"
+        module = importlib.import_module(module_name)
+        MyClass = getattr(module, self.name)
+        instance = MyClass(self.name)
         for param in self.variables_partial_knowledge:
-            print(param.name)
+            setattr(instance, param.name, param.get_some())
         return instance

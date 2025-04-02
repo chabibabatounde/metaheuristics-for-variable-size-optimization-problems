@@ -13,7 +13,10 @@ partial.add_perception(percept_1, [
     PartialAction(
         'Eat',
         5,
-        PartialKnowledge()
+        PartialKnowledge(
+            name='duration',
+            value=1
+        )
     )
 ])
 
@@ -35,4 +38,3 @@ result = pb.minimise(
     }
 )
 
-print(result)
