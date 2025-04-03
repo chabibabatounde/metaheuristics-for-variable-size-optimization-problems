@@ -15,7 +15,7 @@ class PartialAction:
         self.duration = duration
         if duration is not None:
             self.variables_partial_knowledge.append(PartialKnowledge(name='duration_cycle', value=duration))
-        self.variables_partial_knowledge = []
+        self.variables_partial_knowledge = partial_knowledge
         self.values = []
         self.partial_knowledge(partial_knowledge)
 
@@ -35,6 +35,7 @@ class PartialAction:
         module = importlib.import_module(module_name)
         MyClass = getattr(module, self.name)
         instance = MyClass(self.name)
+        instance = instance.get_some_instance()
         for param in self.variables_partial_knowledge:
             setattr(instance, param.name, param.get_some())
         return instance

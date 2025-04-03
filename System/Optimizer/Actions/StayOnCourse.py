@@ -1,5 +1,6 @@
 from System.Optimizer.Actions.Action import Action
 import random
+import copy
 
 
 class StayOnCourse(Action):
@@ -16,3 +17,10 @@ class StayOnCourse(Action):
             move(agent, acceleration=self.acceleration)
         else:
             move(agent)
+
+    def get_some_instance(self):
+        element = copy.deepcopy(self)
+        element.acceleration = (random.randint(0, 0), random.randint(0, 0))
+        element.duration_cycle = 1
+        # element.duration_cycle = random.randint(1, 100)
+        return element

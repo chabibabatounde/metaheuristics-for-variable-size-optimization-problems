@@ -1,4 +1,6 @@
 from System.Optimizer.Actions.Action import Action
+import random
+import copy
 
 
 class Eat(Action):
@@ -17,3 +19,10 @@ class Eat(Action):
         if self.kill:
             die(perception_result.closer_agent)
             place_agent(agent, perception_result.closer_agent_position)
+
+    def get_some_instance(self):
+        element = copy.deepcopy(self)
+        element.duration_cycle = random.randint(0, 10)
+        element.gain = random.randint(0, 150)
+        element.move_coast = random.uniform(0, 1)
+        return element

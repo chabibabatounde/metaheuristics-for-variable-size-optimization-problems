@@ -1,5 +1,6 @@
 from System.Optimizer.Actions.Action import Action
-
+import random
+import copy
 
 class GetCloser(Action):
 
@@ -39,3 +40,7 @@ class GetCloser(Action):
             else:
                 position_found = True
                 place_agent(agent, propositions[0]['position'])
+    def get_some_instance(self):
+        element = copy.deepcopy(self)
+        element.duration_cycle = 1
+        return element

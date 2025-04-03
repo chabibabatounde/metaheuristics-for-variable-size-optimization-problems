@@ -1,6 +1,6 @@
 from System.Optimizer.Actions.Action import Action
 import random
-
+import copy
 
 class RunAway(Action):
     name = "RunAway"
@@ -46,3 +46,9 @@ class RunAway(Action):
                         acceleration = (acceleration[0], acceleration[1]+1)
             """
 
+    def get_some_instance(self):
+        element = copy.deepcopy(self)
+        element.duration_cycle = 1
+        # element.duration_cycle = random.randint(1, 100)
+        element.move_coast = random.uniform(0, 10)
+        return element

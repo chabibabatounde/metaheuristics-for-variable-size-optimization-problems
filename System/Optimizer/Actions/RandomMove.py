@@ -1,6 +1,6 @@
 from System.Optimizer.Actions.Action import Action
 import random
-
+import copy
 
 class RandomMove(Action):
     move_probability = None
@@ -42,3 +42,11 @@ class RandomMove(Action):
             if agent.grid.is_move_possible(new_position):
                 # print("\n => ", agent.type, agent.position, self.name, new_position)
                 move(agent, new_velocity, coast=self.lost)
+    def get_some_instance(self):
+        element = copy.deepcopy(self)
+        element.duration_cycle = 1
+        element.max_velocity = (random.randint(0, 2), random.randint(0, 2))
+        element.lost = random.randint(1, 10)
+        element.move_probability = random.uniform(0, 1)
+        element.max_attempt = 4
+        return element

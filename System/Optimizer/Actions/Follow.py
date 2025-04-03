@@ -1,5 +1,6 @@
 from System.Optimizer.Actions.Action import Action
-
+import random
+import copy
 
 class Follow(Action):
     def __init__(self, duration_cycle=1, move_coast=1, spacing=2):
@@ -38,3 +39,8 @@ class Follow(Action):
             place_agent(agent, positions[0]['pos'])
             agent.energy -= agent.grid.distance(agent.position, positions[0]['pos'], False) * self.move_coast
 
+    def get_some_instance(self):
+        element = copy.deepcopy(self)
+        element.move_coast = random.uniform(0, 10)
+        element.spacing = random.randint(1, 5)
+        return element

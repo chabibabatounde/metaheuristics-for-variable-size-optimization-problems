@@ -4,22 +4,40 @@ from System.Optimizer.Perception import Perception
 from System.Optimizer.PartialAction import PartialAction
 from System.Optimizer.PartialKnowledge import PartialKnowledge
 
+
 partial = Animeta()
-percept_1 = Perception('p1', '€.timer%9==0')
-# percept_2 = Perception('p2', '€.timer%7==0')
-# percept_3 = Perception('p3', '€.timer%13==0')
+percept_1 = Perception('p1', 'π.@.energy < 50', perception_type='items')
+percept_2 = Perception('p2', '€.timer%9 == 0', perception_type='bool')
 
 partial.add_perception(percept_1, [
     PartialAction(
         'Eat',
-        5,
+        2,
         PartialKnowledge(
-            name='duration',
+            name='move_coast',
             value=1
         )
-    )
+    ),
+    PartialAction(
+        'Sleep',
+        5,
+        PartialKnowledge(
+            name='gain',
+            value=1
+        )
+    ),
 ])
 
+partial.add_perception(percept_2, [
+    PartialAction(
+        'Sleep',
+        3,
+        PartialKnowledge(
+            name='gain',
+            value=1
+        )
+    ),
+])
 
 pb = Problem(
     partial=partial,
@@ -28,13 +46,9 @@ pb = Problem(
 
 result = pb.minimise(
     score_wanted=0,
-    iteration=100,
-    size=100,
+    iteration=10,
+    size=10,
     algorithm='AG',
-    params={
-        'n_new': 10,
-        'p_m': 0.2,
-        'n_crossing': 20
-    }
+    params={'nb_cross': 3, 'nb_new': 2, 'p_mutation': 0.5}
 )
 

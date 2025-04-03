@@ -30,7 +30,10 @@ class Animeta(Partial):
             for action in self.__perception_match_table[p.name]:
                 actions.append(action_factory.get_action(action))
             solution['perceptions'].append({
-                'name': p.name,
+                'perception': p,
                 'actions': actions
             })
         return solution
+
+    def get_match_table(self):
+        return self.__perception_match_table

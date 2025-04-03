@@ -24,7 +24,7 @@ class Problem:
         solution = None
         if algo == 'AG':
             algorithm = Genetic(self.__partial, score_wanted, iteration, size)
-            solution = algorithm.optimize(params)
+            solution = algorithm.optimize(self.__dataframe, params)
         else:
             raise ValueError("0 as score @Problem.maximize")
         return solution
