@@ -40,7 +40,7 @@ class Agent(mesa.Agent):
             actions = self.__perception_match_table[p['perception'].name]
             params = p['item']
         else:
-            print('Default action')
+            pass
 
         # Execute
         for action in actions:

@@ -7,4 +7,4 @@ class Action:
         self.duration_cycle = 0
 
     def execute(self, agent, perception_result):
-        print('Execution of', self.name, 'from', self)
+        pass
