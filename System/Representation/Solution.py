@@ -22,19 +22,18 @@ class Solution:
         partial = partial.get_match_table()
         graph = nx.DiGraph()
         node_id = 0
-        graph.add_node('ROOT', data=solution, type='root', partial=partial, node_id=node_id, level=0)
+        graph.add_node('ROOT', data=solution, type='root', partial=partial)
         action_id = 0
         param_id = 0
         for perception in solution['perceptions']:
             p = perception['perception']
-            graph.add_node(p.name, data=p, type='perception', partial=p, node_id=node_id, level=1)
+            graph.add_node(p.name, data=p, type='perception', partial=p)
             node_id += 1
             graph.add_edge('ROOT', p.name)
             i = 0
             for action in perception['actions']:
                 action_id += 1
-                graph.add_node(action.name + str(action_id), data=action, type='action', partial=partial[p.name][i],
-                               node_id=node_id, level=2)
+                graph.add_node(action.name + str(action_id), data=action, type='action', partial=partial[p.name][i])
                 node_id += 1
                 graph.add_edge(p.name, action.name + str(action_id))
                 for attr, valeur in vars(action).items():
@@ -45,8 +44,7 @@ class Solution:
                             if attr == a.name:
                                 param_p = a.name
                                 break
-                        graph.add_node(attr + str(param_id), data=valeur, type='param', partial=param_p,
-                                       node_id=node_id, level=3)
+                        graph.add_node(attr + str(param_id), data=valeur, type='param', partial=param_p)
                         node_id += 1
                         graph.add_edge(action.name + str(action_id), attr + str(param_id))
             i += 1
@@ -65,21 +63,30 @@ class Solution:
         return self.__dict
 
     def init_from_graph(self, graph):
-        self.__graph = graph
         self.__dict = {
             'name': 'generated',
             'perceptions': []
         }
         self.__score = 0
-        perceptions = list(self.__graph.neighbors(list(self.__graph.nodes())[0]))
+        perceptions = list(graph.successors(list(graph.nodes())[0]))
         for p in perceptions:
-            perception = {'perception': self.__graph.nodes[p]['data'], 'actions': []}
-            for a in list(self.__graph.successors(p)):
-                action = self.__graph.nodes[a]['data']
+            # print(p, perceptions)
+            perception = {'perception': graph.nodes[p]['data'], 'actions': []}
+            actions = list(graph.successors(p))
+            for a in actions:
+                # print('\t', a, actions)
+                action = graph.nodes[a]['data']
+                parameters = list(graph.successors(a))
+                if len(action.get_attributes()) != len(list(graph.successors(a))):
+                    print('Problem', parameters)
+                    nx.draw(graph, with_labels=True)
+                    plt.show()
+                    exit()
                 params = []
-                for param in list(self.__graph.successors(a)):
-                    if self.__graph.nodes[param]['type'] == 'param':
-                        params.append(self.__graph.nodes[param]['data'])
+                for parameter in parameters:
+                    # print('\t\t', parameter, parameters)
+                    params.append(graph.nodes[parameter]['data'])
                 action.init_params(params)
                 perception['actions'].append(action)
             self.__dict['perceptions'].append(perception)
+        self.__graph = graph

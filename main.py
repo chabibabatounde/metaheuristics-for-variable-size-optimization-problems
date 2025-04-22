@@ -50,9 +50,9 @@ pb = Problem(
 
 result = pb.minimise(
     score_wanted=0,
-    iteration=50,
+    iteration=100,
     size=2,
     algorithm='AG',
-    params={'nb_cross': 1, 'nb_new': 2, 'p_mutation': 0.5}
+    params={'nb_cross': 10, 'nb_new': 5, 'p_mutation': 0.5}
 )
 
