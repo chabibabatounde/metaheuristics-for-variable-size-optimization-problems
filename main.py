@@ -5,6 +5,10 @@ from System.Optimizer.PartialAction import PartialAction
 from System.Optimizer.PartialKnowledge import PartialKnowledge
 
 
+
+
+
+
 partial = Animeta()
 percept_1 = Perception('p1', 'π.@.energy < 50', perception_type='items')
 percept_2 = Perception('p2', '€.timer%9 == 0', perception_type='bool')
@@ -46,9 +50,9 @@ pb = Problem(
 
 result = pb.minimise(
     score_wanted=0,
-    iteration=10,
-    size=10,
+    iteration=50,
+    size=2,
     algorithm='AG',
-    params={'nb_cross': 3, 'nb_new': 2, 'p_mutation': 0.5}
+    params={'nb_cross': 1, 'nb_new': 2, 'p_mutation': 0.5}
 )
 
