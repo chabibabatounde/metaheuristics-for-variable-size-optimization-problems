@@ -51,11 +51,11 @@ class Genetic(Algorithm):
         exit('Fin de processus @GENETIC')
         return random.uniform(0, 100)
 
-    def __candidates(self, len):
-        c1 = random.randint(0, len - 1)
-        c2 = random.randint(0, len - 1)
+    def __candidates(self, size):
+        c1 = random.randint(0, size - 1)
+        c2 = random.randint(0, size - 1)
         while c1 == c2:
-            c2 = random.randint(0, len - 1)
+            c2 = random.randint(0, size - 1)
         return c1, c2
 
     def crossover(self, p1, p2):
