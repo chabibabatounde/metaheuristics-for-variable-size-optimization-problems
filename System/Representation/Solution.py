@@ -36,7 +36,7 @@ class Solution:
                 graph.add_node(action.name + str(action_id), data=action, type='action', partial=partial[p.name][i],
                                node_id=node_id, level=2)
                 node_id += 1
-                graph.add_edge(action.name + str(action_id), p.name)
+                graph.add_edge(p.name, action.name + str(action_id))
                 for attr, valeur in vars(action).items():
                     param_id += 1
                     param_p = None
@@ -48,12 +48,9 @@ class Solution:
                         graph.add_node(attr + str(param_id), data=valeur, type='param', partial=param_p,
                                        node_id=node_id, level=3)
                         node_id += 1
-                        graph.add_edge(attr + str(param_id), action.name + str(action_id))
+                        graph.add_edge(action.name + str(action_id), attr + str(param_id))
             i += 1
         self.__graph = graph
-        nx.draw(graph, with_labels=True)
-        plt.show()
-        exit(self)
 
     def eval(self, df):
         simulator = Simulator(self, df)
@@ -68,7 +65,6 @@ class Solution:
         return self.__dict
 
     def init_from_graph(self, graph):
-
         self.__graph = graph
         self.__dict = {
             'name': 'generated',
@@ -78,13 +74,12 @@ class Solution:
         perceptions = list(self.__graph.neighbors(list(self.__graph.nodes())[0]))
         for p in perceptions:
             perception = {'perception': self.__graph.nodes[p]['data'], 'actions': []}
-            for a in list(self.__graph.neighbors(p)):
-                if self.__graph.nodes[a]['type'] == 'action':
-                    action = self.__graph.nodes[a]['data']
-                    params = []
-                    for param in list(self.__graph.neighbors(a)):
-                        if self.__graph.nodes[param]['type'] == 'param':
-                            params.append(self.__graph.nodes[param]['data'])
-                    action.init_params(params)
-                    perception['actions'].append(action)
+            for a in list(self.__graph.successors(p)):
+                action = self.__graph.nodes[a]['data']
+                params = []
+                for param in list(self.__graph.successors(a)):
+                    if self.__graph.nodes[param]['type'] == 'param':
+                        params.append(self.__graph.nodes[param]['data'])
+                action.init_params(params)
+                perception['actions'].append(action)
             self.__dict['perceptions'].append(perception)
