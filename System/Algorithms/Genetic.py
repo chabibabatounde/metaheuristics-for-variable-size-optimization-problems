@@ -10,7 +10,7 @@ class Genetic(Algorithm):
     def __init__(self, partial, score_wanted, iteration, size):
         super().__init__(partial, score_wanted, iteration, size)
 
-    def optimize(self, df, params=None):
+    def optimize(self, df=None, params=None, env=None, fn=None, variables=[]):
         if params is None:
             params = {'nb_cross': 3, 'nb_new': 2, 'p_mutation': 0.5}
         population = []
@@ -20,7 +20,7 @@ class Genetic(Algorithm):
             s = self.partial.get_some(self.partial)
             population.append({
                 'solution': s,
-                'score': s.eval(df)
+                'score': s.eval(df, variables, fn, env)
             })
         # ---WHILE---
         while iteration < self.iteration:
@@ -33,15 +33,16 @@ class Genetic(Algorithm):
                 # Crossover
                 child1, child2 = self.crossover(population[c1], population[c2])
                 if child1 is not None:
-                    children.append({'solution': child1, 'score': child1.eval(df)})
+                    children.append({'solution': child1, 'score': child1.eval(df, variables, fn, env)})
                 if child2 is not None:
-                    children.append({'solution': child2, 'score': child2.eval(df)})
+                    children.append({'solution': child2, 'score': child2.eval(df, variables, fn, env)})
+
             population = population + children
             for _ in range(params['nb_new']):
                 s = self.partial.get_some(self.partial)
                 population.append({
                     'solution': s,
-                    'score': s.eval(df)
+                    'score': s.eval(df, variables, fn, env)
                 })
             # Update population
             population = sorted(population, key=lambda x: x["score"], reverse=False)[:self.size]

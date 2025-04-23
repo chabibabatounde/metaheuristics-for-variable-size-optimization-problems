@@ -10,6 +10,7 @@ class Partial:
             exit('Please specify the representation type')
 
     def __tree_representation(self, solution, partial):
+        self
         tree = Solution()
         tree.init_from_partial(solution, partial)
         return tree

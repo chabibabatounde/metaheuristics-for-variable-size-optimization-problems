@@ -1,13 +1,10 @@
+from System.Evaluation.Environment import Environment
 from System.Optimizer.Problem import Problem
 from System.Optimizer.Animeta import Animeta
 from System.Optimizer.Perception import Perception
 from System.Optimizer.PartialAction import PartialAction
 from System.Optimizer.PartialKnowledge import PartialKnowledge
-
-
-
-
-
+from System.Evaluation.Fonctions import *
 
 partial = Animeta()
 percept_1 = Perception('p1', 'π.@.energy < 50', perception_type='items')
@@ -43,15 +40,19 @@ partial.add_perception(percept_2, [
     ),
 ])
 
+
 pb = Problem(
     partial=partial,
-    data_set_path='Data/positions.csv'
+    data_set_path='Data/positions.csv',
+    variables=['position'],
+    funct=rmse,
+    env=Environment(width=10, height=10)
 )
 
 result = pb.minimise(
     score_wanted=0,
     iteration=100,
-    size=2,
+    size=100,
     algorithm='AG',
     params={'nb_cross': 10, 'nb_new': 5, 'p_mutation': 0.5}
 )

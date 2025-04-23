@@ -1,16 +1,16 @@
 from System.Evaluation.Model1 import Model1
-from System.Evaluation.Agent import Agent
 
 
 class Simulator:
-    df = None
     solution = None
     model = None
+    env = None
 
-    def __init__(self, solution, df):
-        self.df = df
+    def __init__(self, solution, env=None):
+        self.model = None
         self.solution = solution
-        self.model = Model1(solution)
+        self.env = env
+        self.model = self.__create_model(solution, env)
 
     def run(self, time):
         for _ in range(time):
@@ -20,3 +20,7 @@ class Simulator:
             'agent_data': self.model.datacollector.get_agent_vars_dataframe(),
         }
         return data
+
+    def __create_model(self, solution, env):
+        model = Model1(solution, env)
+        return model
