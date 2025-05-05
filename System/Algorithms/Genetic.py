@@ -1,5 +1,7 @@
 import random
 
+import matplotlib.pyplot as plt
+
 from System.Algorithms.Algorithm import Algorithm
 from System.Representation.Solution import Solution
 import networkx as nx
@@ -10,7 +12,7 @@ class Genetic(Algorithm):
     def __init__(self, partial, score_wanted, iteration, size):
         super().__init__(partial, score_wanted, iteration, size)
 
-    def optimize(self, df=None, params=None, env=None, fn=None, variables=[]):
+    def optimize(self, df=None, params=None, initial_params=None, env=None, fn=None, variables=[]):
         if params is None:
             params = {'nb_cross': 3, 'nb_new': 2, 'p_mutation': 0.5}
         population = []
@@ -20,9 +22,10 @@ class Genetic(Algorithm):
             s = self.partial.get_some(self.partial)
             population.append({
                 'solution': s,
-                'score': s.eval(df, variables, fn, env)
+                'score': s.eval(df, variables, fn, initial_params, env)
             })
         # ---WHILE---
+        performances = []
         while iteration < self.iteration:
             iteration += 1
             print('Iteration ', iteration)
@@ -33,24 +36,23 @@ class Genetic(Algorithm):
                 # Crossover
                 child1, child2 = self.crossover(population[c1], population[c2])
                 if child1 is not None:
-                    children.append({'solution': child1, 'score': child1.eval(df, variables, fn, env)})
+                    children.append({'solution': child1, 'score': child1.eval(df, variables, fn, initial_params, env)})
                 if child2 is not None:
-                    children.append({'solution': child2, 'score': child2.eval(df, variables, fn, env)})
-
+                    children.append({'solution': child2, 'score': child2.eval(df, variables, fn, initial_params, env)})
             population = population + children
             for _ in range(params['nb_new']):
                 s = self.partial.get_some(self.partial)
                 population.append({
                     'solution': s,
-                    'score': s.eval(df, variables, fn, env)
+                    'score': s.eval(df, variables, fn, initial_params, env)
                 })
             # Update population
             population = sorted(population, key=lambda x: x["score"], reverse=False)[:self.size]
             print('\tMin:', population[0]['score'])
             print('\tMax:', population[-1]['score'])
+            performances.append({'it': iteration, 'min': population[0]['score'], 'max': population[-1]['score']})
             # ---END WHILE---
-        exit('Fin de processus @GENETIC')
-        return random.uniform(0, 100)
+        return population[0], performances
 
     def __candidates(self, size):
         c1 = random.randint(0, size - 1)
@@ -108,12 +110,32 @@ class Genetic(Algorithm):
         dfs(start_node, visited)
         return subtree
 
+    def __plot(self, G, name='Df', show=False):
+        def hierarchy_pos(G, root, width=1.0, vert_gap=0.2, vert_loc=0, xcenter=0.5):
+            pos = {}
+            pos[root] = (xcenter, vert_loc)
+            neighbors = list(G.neighbors(root))
+            if len(neighbors) != 0:
+                sub_width = width / len(neighbors)
+                for neighbor in neighbors:
+                    pos.update(
+                        hierarchy_pos(G, neighbor, sub_width, vert_gap, vert_loc - vert_gap, xcenter))
+                    xcenter += sub_width
+            return pos
+
+        pos = hierarchy_pos(G, list(G.nodes)[0])
+        plt.figure(figsize=(16, 10))
+        nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=500, font_size=10)
+        plt.savefig('Plots/1_' + name + '.png', dpi=300)
+        if show:
+            plt.show()
+        plt.clf()
+
     def __replace_node(self, G, node_to_replace, replacement):
         new_G = G.copy()
         replacement_copy = replacement.copy()
         if node_to_replace not in new_G:
             raise ValueError(f"Le nœud {node_to_replace} n'existe pas dans le graphe")
-
         predecessors = list(new_G.predecessors(node_to_replace))
         is_terminal = list(new_G.successors(node_to_replace)) == []
         if is_terminal:
@@ -140,13 +162,13 @@ class Genetic(Algorithm):
             node_mapping = {}
             for repl_node in replacement_copy.nodes():
                 node_name = repl_node
-                if repl_node in remaining_nodes:
+                if node_name in remaining_nodes:
                     i = 0
-                    while node_name in list(replacement_copy.nodes()) or node_name in node_mapping.values():
+                    while node_name in remaining_nodes:  # or node_name in not_map:
                         node_name = repl_node + '_' + str(i)
                         i += 1
                     node_mapping[repl_node] = node_name
-                    remaining_nodes.add(node_mapping[repl_node])
+                    remaining_nodes.add(node_name)
 
             replacement_copy = nx.relabel_nodes(replacement_copy, node_mapping)
             if root_node in node_mapping:
@@ -184,5 +206,18 @@ class Genetic(Algorithm):
             cnt += 1
         return point1, point2
 
-    def __is_lethal(self, graph):
-        return False
+    def __is_lethal(self, new_G):
+        pb = False
+        for n in new_G.nodes:
+            if new_G.nodes[n]['type'] == 'action':
+                sucessors = new_G.successors(n)
+                if len(list(sucessors)) != len(new_G.nodes[n]['data'].get_attributes().keys()):
+                    pb = True
+                if not pb:
+                    for s in sucessors:
+                        if new_G.nodes[s]['type'] != 'param':
+                            pb = True
+                            break
+                if pb:
+                    break
+        return pb

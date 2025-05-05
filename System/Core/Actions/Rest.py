@@ -1,6 +1,5 @@
-from System.Optimizer.Actions.Action import Action
-import random
-import copy
+from System.Core.Actions.Action import Action
+
 
 class Rest(Action):
     def __init__(self, duration_cycle=1):

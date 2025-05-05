@@ -7,7 +7,7 @@ class Action:
         self.duration_cycle = 0
 
     def execute(self, agent, perception_result):
-        pass
+        exit('Please define execute method for your action')
 
     def get_attributes(self):
         params = self.__dict__

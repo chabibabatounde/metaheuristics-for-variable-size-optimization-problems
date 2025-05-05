@@ -1,4 +1,5 @@
-from System.Optimizer.Actions.Action import Action
+from System.Core.Actions.Action import Action
+from System.Core.Actions.Primitives import *
 import random
 import copy
 
@@ -13,12 +14,16 @@ class Eat(Action):
         self.perception_need = True
         Action.__init__(self, duration_cycle)
 
-    def executes(self, agent, perception_result):
-        agent.energy -= perception_result.closer_agent_distance * self.move_coast
-        agent.energy += self.gain
-        if self.kill:
-            die(perception_result.closer_agent)
-            place_agent(agent, perception_result.closer_agent_position)
+    def execute(self, agent, perception_result):
+        if agent.alive:
+            if agent.active:
+                agent.energy -= self.move_coast
+                agent.energy += self.gain
+                target = perception_result[0]
+                move_agent_to(agent, target.pos)
+                print(agent, self.name, '->', target)
+                if self.kill:
+                    die(target)
 
     def get_some_instance(self):
         element = copy.deepcopy(self)

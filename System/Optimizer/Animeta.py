@@ -5,8 +5,10 @@ from System.Optimizer.ActionFactory import ActionFactory
 class Animeta(Partial):
     __perceptions = []
     __perception_match_table = {}
+    __agent_type = None
 
-    def __init__(self):
+    def __init__(self, agent_type):
+        self.__agent_type = agent_type
         self.__perceptions = []
         self.__perception_match_table = {}
 
@@ -21,7 +23,7 @@ class Animeta(Partial):
 
     def generate(self):
         solution = {
-            'name': 'generated',
+            'type': self.__agent_type,
             'perceptions': []
         }
         action_factory = ActionFactory()

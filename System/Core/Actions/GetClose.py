@@ -1,5 +1,4 @@
-from System.Optimizer.Actions.Action import Action
-import random
+from System.Core.Actions.Action import Action
 import copy
 
 class GetCloser(Action):

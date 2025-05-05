@@ -1,6 +1,6 @@
 import random
 import copy
-from System.Optimizer.Actions.Action import Action
+from System.Core.Actions.Action import Action
 
 
 class Sleep(Action):

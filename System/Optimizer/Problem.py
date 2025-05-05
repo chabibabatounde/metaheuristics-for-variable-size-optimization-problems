@@ -5,11 +5,13 @@ from System.Algorithms.Genetic import Genetic
 class Problem:
     __dataframe = None
     __partial = None
+    __initial_params = None
     __env = None
 
-    def __init__(self, partial, data_set_path, funct, variables=[], env=None):
+    def __init__(self, partial, data_set_path, funct, variables=[], initial_params=[], env=None):
         self.__dataframe = pd.read_csv(data_set_path)
         self.__partial = partial
+        self.__initial_params = initial_params
         self.__function = funct
         self.__variables = variables
         self.__env = env
@@ -33,7 +35,14 @@ class Problem:
         solution = None
         if algo == 'AG':
             algorithm = Genetic(self.__partial, score_wanted, iteration, size)
-            solution = algorithm.optimize(self.__dataframe, params, self.__env, self.__function, self.__variables)
+            solution = algorithm.optimize(
+                self.__dataframe,
+                params,
+                self.__initial_params,
+                self.__env,
+                self.__function,
+                self.__variables
+            )
         else:
             raise ValueError("0 as score @Problem.maximize")
         return solution

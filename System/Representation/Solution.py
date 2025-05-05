@@ -1,10 +1,7 @@
-import random
-
 import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
-
-from System.Evaluation.Simulator import Simulator
+from System.Core.Simulator import Simulator
 
 
 class Solution:
@@ -27,7 +24,6 @@ class Solution:
         plt.figure(figsize=(25, 10))
         nx.draw(self.__graph, pos, with_labels=True, node_color='lightblue', node_size=500, font_size=10)
         plt.show()
-
 
     def init_from_partial(self, solution, partial):
         self.__graph = None
@@ -64,10 +60,10 @@ class Solution:
             i += 1
         self.__graph = graph
 
-    def eval(self, df, target_variables, function, env):
+    def eval(self, df, target_variables, function, initial_params, env):
         variables = target_variables.copy()
         target_data = 0
-        simulator = Simulator(self, env)
+        simulator = Simulator(self, initial_params, env)
         data = simulator.run(len(df))
         agent_data = data['agent_data'].xs(key=target_data, level=1)
         model_data = data['model_data']
