@@ -1,3 +1,6 @@
+import ast
+import numpy as np
+
 import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -25,7 +28,7 @@ class Solution:
         nx.draw(self.__graph, pos, with_labels=True, node_color='lightblue', node_size=500, font_size=10)
         plt.show()
 
-    def init_from_partial(self, solution, partial):
+    def init_from_dict(self, solution, partial):
         self.__graph = None
         self.__dict = solution
         self.__score = 0
@@ -60,25 +63,31 @@ class Solution:
             i += 1
         self.__graph = graph
 
-    def eval(self, df, target_variables, function, initial_params, env):
+    def eval(self, data_frame, target_variables, function, initial_params, env):
         variables = target_variables.copy()
-        target_data = 0
-        simulator = Simulator(self, initial_params, env)
-        data = simulator.run(len(df))
-        agent_data = data['agent_data'].xs(key=target_data, level=1)
-        model_data = data['model_data']
+        target_data = 1
+        simulator = Simulator(self.get_dict(), initial_params, env)
+        df = data_frame[variables].copy()
+        simulator.run(len(df))
+        agent_data = simulator.read_data(variable='AgentID', value=target_data)
         available_steps = agent_data.index.get_level_values('Step').unique()
         predicted_values = pd.DataFrame()
+
         additional_variables = []
         if 'position' in variables:
-            position_series = agent_data.loc[available_steps, 'position']
-            predicted_values = position_series.reset_index()
+            predicted_values = agent_data.loc[available_steps, 'position'].reset_index()
             predicted_values.columns = ['step', 'position']
-            predicted_values['x'] = predicted_values['position'].apply(lambda pos: pos[0])
-            predicted_values['y'] = predicted_values['position'].apply(lambda pos: pos[1])
-            predicted_values = predicted_values.drop('position', axis=1)
+            df['position'] = df['position'].apply(ast.literal_eval)
+            df['pos_x'], df['pos_y'] = df['position'].str[0],  df['position'].str[1]
+            df = df.drop('position', axis=1)
+
+            xs = np.array([pos[0] for pos in predicted_values['position']])
+            ys = np.array([pos[1] for pos in predicted_values['position']])
+            predicted_values['pos_x'], predicted_values['pos_y'] = xs, ys
+            predicted_values = predicted_values.drop(['position', 'step'], axis=1)
             variables.remove('position')
-            additional_variables += ['x', 'y']
+            additional_variables += ['pos_x', 'pos_y']
+
         for var in variables:
             predicted_values[var] = agent_data.loc[available_steps, var].reset_index()[var]
         variables += additional_variables
@@ -93,7 +102,7 @@ class Solution:
 
     def init_from_graph(self, graph):
         self.__dict = {
-            'name': 'generated',
+            'type': graph.nodes['ROOT']['data']['type'],
             'perceptions': []
         }
         self.__score = 0

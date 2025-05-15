@@ -10,38 +10,33 @@ partial = Animeta('predator')
 partial.add_perception(p1, [
     PartialAction(
         'Eat',
-        2,
-        PartialKnowledge(
-            name='move_coast',
-            value=1
-        )
-    ),
-    PartialAction(
-        'Sleep',
         5,
         PartialKnowledge(
             name='gain',
-            value=1
+            value=10
+        ),
+        PartialKnowledge(
+            name='move_coast',
+            range_start_point=3,
+            range_end_point=5,
+            attribute_type='int',
         )
-    ),
+    )
 ])
 partial.add_perception(p2, [
     PartialAction(
-        'Sleep',
-        3,
-        PartialKnowledge(
-            name='gain',
-            value=1
-        )
+        'GetClose',
+        1
     ),
 ])
 res = []
+
 initial_params = [
-    {'position': (00, 00), 'energy': '100'},
-    {'position': (10, 10), 'energy': '100'},
-    {'position': (20, 20), 'energy': '100'},
-    {'position': (30, 30), 'energy': '100'},
-    {'position': (40, 40), 'energy': '100'}
+    {'position': (00, 00), 'energy': 100, 'eating': False},
+    {'position': (10, 10), 'energy': 100, 'eating': False},
+    {'position': (20, 20), 'energy': 100, 'eating': False},
+    {'position': (30, 30), 'energy': 100, 'eating': False},
+    {'position': (40, 40), 'energy': 100, 'eating': False}
 ]
 for i in range(100):
     pb = Problem(
@@ -55,8 +50,8 @@ for i in range(100):
     result = pb.minimise(
         score_wanted=0,
         iteration=100,
-        size=10,
+        size=50,
         algorithm='AG',
-        params={'nb_cross': 10, 'nb_new': 10, 'p_mutation': 0.5}
+        params={'nb_cross': 5, 'nb_new': 5, 'p_mutation': 0.5}
     )
     res.append(result)

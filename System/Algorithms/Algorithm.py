@@ -9,6 +9,7 @@ class Algorithm:
         self.score_wanted = score_wanted
         self.iteration = iteration
         self.size = size
+        self.name = 'Metaheuristic'
 
     def optimize(self, params=None):
         exit('Please define the <optimize> method for the algorithm you used')

@@ -21,9 +21,6 @@ class RandomMove(Action):
         self.lost = lost
         self.perception_need = False
 
-    def execute(self, agent, perception_result=None):
-        if agent.alive:
-            if agent.active:
-                print(agent, self. name)
-                if random.uniform(0, 1) > self.move_probability:
-                    random_move(agent, self.max_velocity)
+    def process(self, agent, perception_result=None):
+        if random.uniform(0, 1) > self.move_probability:
+            random_move(agent, self.max_velocity)

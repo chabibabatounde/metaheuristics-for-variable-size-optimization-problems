@@ -3,11 +3,17 @@ from System.Representation.Solution import Solution
 
 class Partial:
 
+    def get_some(self):
+        exit('Please define get_some method for ' + str(self))
+
+    '''
     def get_some(self, partial, representation='tree'):
+        print(representation)
         if representation == 'tree':
             return self.__tree_representation(self.generate(), partial)
         else:
             exit('Please specify the representation type')
+    '''
 
     def __tree_representation(self, solution, partial):
         self
@@ -17,4 +23,3 @@ class Partial:
 
     def generate(self, partial):
         exit('Please define the <generate> method for your partial')
-

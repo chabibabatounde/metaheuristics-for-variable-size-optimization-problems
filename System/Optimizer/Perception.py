@@ -22,7 +22,7 @@ class Perception:
         if items is None:
             return self.priority
         else:
-            return len(items) * self.priority
+            return self.priority
 
     def __trigger(self, agent):
         res = False

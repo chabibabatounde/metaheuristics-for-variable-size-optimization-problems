@@ -18,12 +18,15 @@ class Genetic(Algorithm):
         population = []
         iteration = 0
         # initialize population
+        print(self.name, ':', "Initialize population")
         for _ in range(self.size):
-            s = self.partial.get_some(self.partial)
+            s = Solution()
+            s.init_from_dict(self.partial.get_some(), self.partial)
             population.append({
                 'solution': s,
                 'score': s.eval(df, variables, fn, initial_params, env)
             })
+        print("Process started")
         # ---WHILE---
         performances = []
         while iteration < self.iteration:
@@ -41,11 +44,13 @@ class Genetic(Algorithm):
                     children.append({'solution': child2, 'score': child2.eval(df, variables, fn, initial_params, env)})
             population = population + children
             for _ in range(params['nb_new']):
-                s = self.partial.get_some(self.partial)
+                s = Solution()
+                s.init_from_dict(self.partial.get_some(), self.partial)
                 population.append({
                     'solution': s,
                     'score': s.eval(df, variables, fn, initial_params, env)
                 })
+            # exit('Process starter @Genetic')
             # Update population
             population = sorted(population, key=lambda x: x["score"], reverse=False)[:self.size]
             print('\tMin:', population[0]['score'])

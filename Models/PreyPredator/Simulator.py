@@ -7,18 +7,12 @@ agent_dict = {'type': 'predator', 'perceptions': [
         'actions': [
             action_factory.get('Eat')(duration_cycle=5, gain=1, move_coast=0, kill=True),
         ]
-    },
-    {
-        'perception': p2,
-        'actions': [
-            action_factory.get('RandomMove')(duration_cycle=1, max_velocity=(5, 5), move_probability=0.5)
-        ]
     }
     ,
     {
-        'perception': p3,
+        'perception': p2,
         'actions': [
-            action_factory.get('RandomMove')(duration_cycle=1, max_velocity=(5, 5), move_probability=0.5)
+            action_factory.get('GetClose')(duration_cycle=1)
         ]
     }
 ]}
@@ -34,3 +28,4 @@ simulator = Simulator(agent_dict, initial_params, env)
 simulator.run(100)
 data = simulator.read_data(variable='AgentID', value=1)
 data.to_csv('PreyPredator/Data.csv')
+print("Simulation terminée")

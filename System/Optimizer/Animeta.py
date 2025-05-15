@@ -21,7 +21,7 @@ class Animeta(Partial):
                 self.__perception_match_table[perception.name] = actions
                 break
 
-    def generate(self):
+    def get_some(self):
         solution = {
             'type': self.__agent_type,
             'perceptions': []

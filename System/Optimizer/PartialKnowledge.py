@@ -1,7 +1,7 @@
 import random
 
 
-class PartialKnowledge():
+class PartialKnowledge:
     name = None
     type = None  # int, float or tuple (as string not as type)
     range_start_point = None

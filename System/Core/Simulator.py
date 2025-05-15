@@ -34,7 +34,6 @@ class Simulator:
         model = AnimetaModel()
         if not isinstance(solution, dict):
             solution = solution.get_dict()
-
         n = len(initial_params)
         if n == 0:
             print('\nDefine if number of agent is not')

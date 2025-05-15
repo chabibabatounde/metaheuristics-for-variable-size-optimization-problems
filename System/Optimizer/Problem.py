@@ -21,7 +21,6 @@ class Problem:
             self.__dataframe['y'] = self.__dataframe['pos'].apply(lambda pos: pos[1])
             self.__dataframe = self.__dataframe.drop(['timer', 'pos'], axis=1)
 
-
     def minimise(self, score_wanted=0, iteration=100, size=100, algorithm=None, params={}):
         return self.__resolve(score_wanted, iteration, size, algorithm, params)
 

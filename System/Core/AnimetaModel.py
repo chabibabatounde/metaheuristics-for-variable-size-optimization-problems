@@ -61,13 +61,3 @@ class AnimetaModel(mesa.Model):
         self.schedule.step()
         self.timer += 1
 
-    def run(self, time):
-        for a in list(self.agents):
-            print(a.type, a.pos)
-        for _ in range(time):
-            self.step()
-        data = {
-            'model_data': self.datacollector.get_model_vars_dataframe(),
-            'agent_data': self.datacollector.get_agent_vars_dataframe(),
-        }
-        return data
