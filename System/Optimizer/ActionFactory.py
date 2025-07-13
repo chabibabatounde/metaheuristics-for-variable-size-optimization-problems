@@ -1,3 +1,5 @@
+import copy
+
 from System.Optimizer.PartialAction import PartialAction
 
 
@@ -7,4 +9,4 @@ class ActionFactory:
         if isinstance(element, PartialAction):
             return element.get_some()
         else:
-            return element
+            return copy.deepcopy(element)

@@ -60,4 +60,3 @@ class AnimetaModel(mesa.Model):
         self.datacollector.collect(self)
         self.schedule.step()
         self.timer += 1
-

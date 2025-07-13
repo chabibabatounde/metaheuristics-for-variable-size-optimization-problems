@@ -4,10 +4,10 @@ import random
 import copy
 
 
-class Eat(Action):
+class GoAndEat(Action):
 
     def __init__(self, duration_cycle=1, gain=None, move_coast=None, kill=None):
-        self.name = "Eat"
+        self.name = "GoAndEat"
         self.gain = gain
         self.kill = kill
         self.move_coast = move_coast
@@ -27,7 +27,7 @@ class Eat(Action):
         agent.energy -= self.move_coast
         agent.energy += self.gain
         target = perception_result[0]
-        # move_agent_to(agent, target.pos)
+        move_agent_to(agent, target.pos)
         if self.kill:
             die(target)
 

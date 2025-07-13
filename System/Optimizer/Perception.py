@@ -6,6 +6,9 @@ class Perception:
     name = ''
     radius = 0
 
+    def get_conditions(self):
+        return self.__condition
+
     def __init__(self, name, condition, radius=1, perception_type='bool', priority=1):
         self.priority = priority
         self.radius = radius

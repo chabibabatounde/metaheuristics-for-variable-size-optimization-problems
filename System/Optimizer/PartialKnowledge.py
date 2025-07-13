@@ -1,7 +1,8 @@
 import random
+from System.Optimizer.Partial import Partial
 
 
-class PartialKnowledge:
+class PartialKnowledge(Partial):
     name = None
     type = None  # int, float or tuple (as string not as type)
     range_start_point = None

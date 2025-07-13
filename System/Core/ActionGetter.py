@@ -1,6 +1,8 @@
 from System.Core.Actions.Eat import Eat
 from System.Core.Actions.RandomMove import RandomMove
 from System.Core.Actions.GetClose import GetClose
+from System.Core.Actions.Void import Void
+from System.Core.Actions.GoAndEat import GoAndEat
 
 
 class ActionGetter:
@@ -10,7 +12,9 @@ class ActionGetter:
         self.__class_items = {
             'Eat': Eat,
             'RandomMove': RandomMove,
-            'GetClose': GetClose
+            'GetClose': GetClose,
+            'GoAndEat': GoAndEat,
+            'Void': Void
         }
 
     def get(self, action_name):

@@ -1,6 +1,7 @@
 import mesa
 from System.Optimizer.Perception import Perception
 from System.Core.Actions.RandomMove import RandomMove
+from System.Core.Actions.Void import Void
 from copy import deepcopy
 
 
@@ -14,6 +15,9 @@ class Agent(mesa.Agent):
     active = False
     alive = False
     action_time_count = 0
+
+    def get_actions(self):
+        return self.__perception_match_table
 
     def __init__(self, agent_type, model=None, initial_params=None):
         if model is not None:
@@ -32,6 +36,9 @@ class Agent(mesa.Agent):
         self.current_actions = []
         if initial_params is not None:
             self.__initial_params(initial_params)
+
+
+        '''
         self.add_perception(
             {
                 'perception': Perception('default', condition="$.type=='" + agent_type + "'"),
@@ -40,6 +47,7 @@ class Agent(mesa.Agent):
                 ]
             }
         )
+        '''
 
     def __initial_params(self, params):
         for p in params:

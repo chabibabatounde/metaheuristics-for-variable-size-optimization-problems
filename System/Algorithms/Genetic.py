@@ -1,7 +1,8 @@
 import random
 
 import matplotlib.pyplot as plt
-
+from System.Optimizer.Partial import Partial
+from System.Optimizer.PartialAction import PartialAction
 from System.Algorithms.Algorithm import Algorithm
 from System.Representation.Solution import Solution
 import networkx as nx
@@ -29,7 +30,7 @@ class Genetic(Algorithm):
         print("Process started")
         # ---WHILE---
         performances = []
-        while iteration < self.iteration:
+        while iteration < self.iteration and population[0]['score'] > 0:
             iteration += 1
             print('Iteration ', iteration)
             # Choose_candidates
@@ -50,7 +51,6 @@ class Genetic(Algorithm):
                     'solution': s,
                     'score': s.eval(df, variables, fn, initial_params, env)
                 })
-            # exit('Process starter @Genetic')
             # Update population
             population = sorted(population, key=lambda x: x["score"], reverse=False)[:self.size]
             print('\tMin:', population[0]['score'])
@@ -66,19 +66,29 @@ class Genetic(Algorithm):
             c2 = random.randint(0, size - 1)
         return c1, c2
 
+    def __is_possible_crossing(self, g1, g2, p1, p2):
+        node1 = g1.nodes[list(g1.nodes)[p1]]
+        node2 = g2.nodes[list(g2.nodes)[p2]]
+        if isinstance(node1['partial'], PartialAction):
+            return node2['data'].__class__.__name__ == node1['partial'].name
+        return False
+
     def crossover(self, p1, p2):
         graph1 = p1['solution'].get_graph()
         graph2 = p2['solution'].get_graph()
         point_1, point_2 = self.__choice_crossing_point(graph1, graph2)
-        point_1 = list(graph1.nodes())[point_1]
-        point_2 = list(graph2.nodes())[point_2]
-        child1 = self.__crossing(p1, point_1, p2, point_2)
-        child2 = self.__crossing(p2, point_2, p1, point_1)
+        child1, child2 = None, None
+        if self.__is_possible_crossing(graph1, graph2, point_1, point_2):
+            child1 = self.__crossing(p1, point_1, p2, point_2)
+        if self.__is_possible_crossing(graph2, graph1, point_2, point_1):
+            child2 = self.__crossing(p2, point_2, p1, point_1)
         return child1, child2
 
-    def __crossing(self, p1, point_1, p2, point_2):
-        graph1 = p1['solution'].get_graph()
-        graph2 = p2['solution'].get_graph()
+    def __crossing(self, parent_1, point_1, parent_2, point_2):
+        graph1 = parent_1['solution'].get_graph()
+        graph2 = parent_2['solution'].get_graph()
+        point_1 = list(graph1.nodes)[point_1]
+        point_2 = list(graph2.nodes)[point_2]
         replacement = self.__get_replacement_tree(graph2, point_2)
         graph = self.__replace_node(graph1, point_1, replacement)
         if not self.__is_lethal(graph):
@@ -94,17 +104,17 @@ class Genetic(Algorithm):
         visited = []
 
         def dfs(node, visited):
-            node_data = graph.nodes()[node]
+            node_data = graph.nodes[node]
             subtree.add_node('*' + node, data=node_data['data'], type=node_data['type'], partial=node_data['partial'])
             ngb_list = list(graph.neighbors(node))
-            c1 = not (node == list(graph.nodes())[-1])
-            c2 = (len(ngb_list) == 1 and graph.nodes()[ngb_list[0]]['type'] == 'param')
+            c1 = not (node == list(graph.nodes)[-1])
+            c2 = (len(ngb_list) == 1 and graph.nodes[ngb_list[0]]['type'] == 'param')
             if c1 or c2:
                 visited.append(node)
                 for neighbor in graph.successors(node):
                     if neighbor not in visited:
-                        neighbor_node = graph.nodes()[neighbor]
-                        current_node = graph.nodes()[node]
+                        neighbor_node = graph.nodes[neighbor]
+                        current_node = graph.nodes[node]
                         subtree.add_node('*' + node, data=current_node['data'], type=current_node['type'],
                                          partial=current_node['partial'])
                         subtree.add_node('*' + neighbor, data=neighbor_node['data'], type=neighbor_node['type'],
@@ -190,26 +200,46 @@ class Genetic(Algorithm):
     def __re_choice_node(self, graph, pos):
         n = list(graph.nodes)[pos]
         node = graph.nodes[n]
+        c1 = node['type'] in ['perception']
+        c2 = 'perception_need' in n
+        c3 = 'kill' in n
+        c4 = not isinstance(node['partial'], Partial)
+        return c1 or c2 or c3 or c4
+
+    def __re_choice_part_2(self, graph, pos, node_1):
+        n = list(graph.nodes)[pos]
+        node = graph.nodes[n]
         c1 = (node['type'] not in ['perception'])
         c2 = ('perception_need' not in n)
         c3 = ('kill' not in n)
-        r = True
-        if c1 and c2 and c3:
-            r = False
-        return r
+        c4 = True
+        if isinstance(node_1['data'], tuple):
+            c4 = isinstance(node['data'], tuple)
+        return not (c1 and c2 and c3 and c4)
 
     def __choice_crossing_point(self, graph1, graph2):
-        nodes = list(graph1.nodes(data=True))
-        point1 = random.randint(1, len(nodes) - 1)
+        point1 = random.randint(1, len(list(graph1.nodes)) - 1)
         while self.__re_choice_node(graph1, point1):
-            point1 = random.randint(1, len(nodes) - 1)
-        nodes_ = list(graph2.nodes(data=True))
-        point2 = random.randint(1, len(nodes_) - 1)
-        cnt = 0
-        while nodes_[point2][1]['type'] != nodes[point1][1]['type'] or self.__re_choice_node(graph2, point2):
-            point2 = random.randint(1, len(nodes_) - 1)
-            cnt += 1
+            point1 = random.randint(1, len(list(graph1.nodes)) - 1)
+        point2 = random.randint(1, len(list(graph2.nodes)) - 1)
+        while self.__node_can_not_be_exchange(graph1.nodes[list(graph1.nodes)[point1]], graph2, point2):
+            point2 = random.randint(1, len(list(graph2.nodes)) - 1)
         return point1, point2
+
+    def __node_can_not_be_exchange(self, node_1, graph, point):
+        node_key = list(graph.nodes)[point]
+        node = graph.nodes[node_key]
+        # type is different ?
+        c1 = node['type'] != node_1['type']
+        # is perception node ?
+        c2 = node['type'] in ['perception']
+        # is perception need variable (boolean)?
+        c3 = 'perception_need' in node_key
+        # is kill variable (boolean)?
+        c3 = 'kill' in node_key
+        # is both variables not a tuple ?
+        c4 = isinstance(node_1['data'], tuple) and not isinstance(node['data'], tuple)
+        return c1 or c2 or c3 or c4
 
     def __is_lethal(self, new_G):
         pb = False
@@ -225,4 +255,6 @@ class Genetic(Algorithm):
                             break
                 if pb:
                     break
+        if pb:
+            exit('lethal')
         return pb

@@ -5,7 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
 from System.Core.Simulator import Simulator
-
+from System.Core.Actions.Action import Action
 
 class Solution:
     __graph = None
@@ -23,6 +23,7 @@ class Solution:
                     pos.update(hierarchy_pos(G, neighbor, sub_width, vert_gap, vert_loc - vert_gap, xcenter))
                     xcenter += sub_width
             return pos
+
         pos = hierarchy_pos(self.__graph, list(self.__graph.nodes)[0])
         plt.figure(figsize=(25, 10))
         nx.draw(self.__graph, pos, with_labels=True, node_color='lightblue', node_size=500, font_size=10)
@@ -44,22 +45,35 @@ class Solution:
             node_id += 1
             graph.add_edge('ROOT', p.name)
             i = 0
+            action_pos = 0
             for action in perception['actions']:
-                action_id += 1
-                graph.add_node(action.name + str(action_id), data=action, type='action', partial='Perception')
+                graph.add_node(
+                    action.name + str(action_id),
+                    data=action,
+                    type='action',
+                    partial=partial[perception['perception'].name][action_pos]
+                )
+                action_pos += 1
                 node_id += 1
                 graph.add_edge(p.name, action.name + str(action_id))
                 for attr, valeur in vars(action).items():
                     param_id += 1
                     param_p = None
                     if attr not in ['name']:
-                        for a in partial[p.name][i].variables_partial_knowledge:
-                            if attr == a.name:
-                                param_p = a.name
-                                break
-                        graph.add_node(attr + str(param_id), data=valeur, type='param', partial=valeur)
+                        if isinstance(partial[p.name][i], Action):
+                            param_p = valeur
+                        else:
+                            if attr == 'duration_cycle':
+                                param_p = partial[p.name][i].duration_cycle
+                            else:
+                                for a in partial[p.name][i].variables_partial_knowledge:
+                                    if attr == a.name:
+                                        param_p = a
+                                        break
+                        graph.add_node(attr + str(param_id), data=valeur, type='param', partial=param_p)
                         node_id += 1
                         graph.add_edge(action.name + str(action_id), attr + str(param_id))
+                action_id += 1
             i += 1
         self.__graph = graph
 
@@ -78,9 +92,8 @@ class Solution:
             predicted_values = agent_data.loc[available_steps, 'position'].reset_index()
             predicted_values.columns = ['step', 'position']
             df['position'] = df['position'].apply(ast.literal_eval)
-            df['pos_x'], df['pos_y'] = df['position'].str[0],  df['position'].str[1]
+            df['pos_x'], df['pos_y'] = df['position'].str[0], df['position'].str[1]
             df = df.drop('position', axis=1)
-
             xs = np.array([pos[0] for pos in predicted_values['position']])
             ys = np.array([pos[1] for pos in predicted_values['position']])
             predicted_values['pos_x'], predicted_values['pos_y'] = xs, ys
@@ -92,6 +105,7 @@ class Solution:
             predicted_values[var] = agent_data.loc[available_steps, var].reset_index()[var]
         variables += additional_variables
         self.__score = function(df, predicted_values, variables)
+
         return self.__score
 
     def get_graph(self):
